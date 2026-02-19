@@ -1,0 +1,22 @@
+{
+  "presets": {
+    "default": {
+      "tags": [],
+      "exclude_tags": [],
+      "max_results": 50,
+      "max_pages": 5,
+      "output_template": "imhentai/{title}/[{release_date}] {filename}.{ext}"
+    },
+    "all": {
+      "tags": [],
+      "exclude_tags": [],
+      "max_results": 500,
+      "max_pages": null,
+      "output_template": "imhentai/{title}/[{release_date}] {filename}.{ext}"
+    }
+  },
+  "download_delay_seconds": 30,
+  "max_retries": 3,
+  "timeout_seconds": 30,
+  "concurrent_downloads": 2
+}

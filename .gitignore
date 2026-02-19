@@ -1,0 +1,20 @@
+# Ignore third-party tools
+tools/
+
+# Ignore logs
+logs/
+
+# Ignore downloads (if inside repo)
+downloads/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore node artifacts
+node_modules/
+
+# Ignore local config overrides
+*.local.json
+media.config.json
+
