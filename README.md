@@ -1,6 +1,6 @@
 # IMHentai Downloader
 
-A tag-based manga/doujin downloader for www.imhentai.xxx with preset search configurations, respectful rate limiting, and account support via browser cookies.
+A tag-based manga/doujin downloader for www.imhentai.xxx with preset search configurations, respectful rate limiting, and account support via browser cookies. This is primarily to be used with my [MediaTools](https://github.com/orionpsg1/MediaTools) wrapper.
 
 ## Features
 
