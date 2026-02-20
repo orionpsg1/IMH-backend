@@ -6,7 +6,7 @@ A tag-based manga/doujin downloader for www.imhentai.xxx with preset search conf
 
 - **Tag-Based Search**: Define preset tag combinations for automated searches
 - **Browser Authentication**: Extract cookies from Firefox/Chrome for logged-in access
-- **Rate Limiting**: Configurable delays (default 30 seconds) to respect site limits
+- **Rate Limiting**: Configurable delays (default 0.5 seconds) to respect site limits
 - **Smart Deduplication**: Archive-based tracking prevents re-downloading already-retrieved files
 - **Flexible Configuration**: JSON presets with CLI override capability
 - **Async Downloads**: Concurrent downloads with retry logic and exponential backoff
@@ -50,7 +50,7 @@ python main.py --preset default --tags "school,romance" --exclude-tags "rape"
 
 **Control rate limiting:**
 ```powershell
-python main.py --preset default --delay 40
+python main.py --preset default --delay 0.5
 ```
 
 **Language filter (defaults to English-only):**
@@ -120,7 +120,7 @@ Define named preset configurations:
       "output_template": "imhentai/{title}/[{release_date}] {filename}.{ext}"
     }
   },
-  "download_delay_seconds": 30,
+  "download_delay_seconds": 0.5,
   "max_retries": 3,
   "timeout_seconds": 30,
   "concurrent_downloads": 2
@@ -140,7 +140,7 @@ Define named preset configurations:
 
 ### Global Settings
 
-- `download_delay_seconds`: Minimum delay between downloads (respects site's 30-second limit)
+- `download_delay_seconds`: Minimum delay between downloads (default 0.5 seconds; increase if you encounter rate limits)
 - `max_retries`: Number of retry attempts for failed downloads
 - `timeout_seconds`: HTTP request timeout
 - `concurrent_downloads`: Number of parallel download workers
@@ -181,15 +181,14 @@ Remove-Item imhentai-archive.json
 
 ## Rate Limiting & Site Courtesy
 
-IMHentai has a 30-second download buffer for free users. By default, this tool enforces a 30-second delay between consecutive downloads.
+By default, this tool enforces a short delay (0.5s) between consecutive downloads. Increase `download_delay_seconds` in `config/presets.json` or pass `--delay` if you encounter rate limits or throttling.
 
-**Why respect rate limits?**
+**Why be cautious with rate limits?**
 - Prevents IP blocking
 - Reduces server load
-- Allows other users to access the site
-- Won't trigger anti-bot measures
+- Avoids triggering anti-bot measures
 
-You can increase the delay if desired, but should not decrease it below 30 seconds.
+If you rely on a free account with explicit server-side buffers, increase the delay accordingly.
 
 ## Troubleshooting
 

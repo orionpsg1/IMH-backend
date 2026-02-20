@@ -19,7 +19,7 @@ class PresetConfig:
 @dataclass
 class DownloadConfig:
     """Global download configuration."""
-    download_delay_seconds: int = 30
+    download_delay_seconds: float = 30.0
     max_retries: int = 3
     timeout_seconds: int = 30
     concurrent_downloads: int = 2
@@ -85,7 +85,7 @@ class ConfigManager:
         exclude_tags: Optional[List[str]] = None,
         max_results: Optional[int] = None,
         max_pages: Optional[int] = None,
-        delay_seconds: Optional[int] = None
+        delay_seconds: Optional[float] = None
     ) -> tuple[PresetConfig, DownloadConfig]:
         """Merge a preset with CLI overrides.
         

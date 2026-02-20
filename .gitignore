@@ -1,5 +1,9 @@
-# Ignore third-party tools
-tools/
+imhentai_cookies.json
+*.imhentai_credentials.json
+tmp_post_test.py
+*.pyc
+__pycache__/# Ignore third-party tools
+
 
 # Ignore logs
 logs/
@@ -9,6 +13,7 @@ downloads/
 
 # Ignore Python cache
 __pycache__/
+imhentai/src/__pycache__/
 *.pyc
 
 # Ignore node artifacts
@@ -20,3 +25,12 @@ media.config.json
 *.json
 
 config/presets.json
+
+test_downloads/
+src/__pycache__/config.cpython-314.pyc
+src/__pycache__/config.cpython-314.pyc
+src/__pycache__/config.cpython-314.pyc
+src/__pycache__/downloader.cpython-314.pyc
+src/__pycache__/imhentai_api.cpython-314.pyc
+src/__pycache__/session.cpython-314.pyc
+src/__pycache__/utils.cpython-314.pyc

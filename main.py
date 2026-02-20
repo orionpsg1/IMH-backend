@@ -12,6 +12,8 @@ from src.imhentai_api import IMHentaiAPI
 from src.downloader import DownloadManager
 from rich.console import Console
 from rich.table import Table
+import os
+import json
 
 
 def main():
@@ -53,8 +55,8 @@ def main():
 
     parser.add_argument(
         "--delay",
-        type=int,
-        help="Delay in seconds between consecutive downloads (respects site limits)"
+        type=float,
+        help="Delay in seconds between consecutive downloads (supports fractional seconds)"
     )
 
     parser.add_argument(
@@ -69,6 +71,12 @@ def main():
         default="firefox",
         choices=["firefox", "chrome"],
         help="Browser to extract cookies from"
+    )
+
+    parser.add_argument(
+        "--cred-file",
+        type=Path,
+        help="Path to JSON file containing {\"username\":..., \"password\":...} for non-interactive login"
     )
 
     parser.add_argument(
@@ -94,6 +102,20 @@ def main():
         "--test-connection",
         action="store_true",
         help="Test connection to IMHentai and authentication status"
+    )
+
+    parser.add_argument(
+        "--gallery-concurrency",
+        type=int,
+        default=None,
+        help="Maximum number of galleries to process concurrently (overrides preset)."
+    )
+
+    parser.add_argument(
+        "--viewer-delay-ms",
+        type=int,
+        default=None,
+        help="Delay in milliseconds between viewer page requests (default 500)."
     )
 
     args = parser.parse_args()
@@ -167,16 +189,52 @@ def main():
     output_dir = args.output or Path.cwd()
 
     # Check authentication
+    # Ensure authentication: try browser cookies first, then env/cred-file, then optional prompt
     if not session_manager.is_authenticated():
         console.print("[yellow]⚠ Warning: Not logged in (extracted cookies not found)[/yellow]")
-        console.print("   You may have limited access to galleries")
+
+        # Non-interactive credential sources (env vars or cred file)
+        env_user = os.environ.get('IMHENTAI_USER')
+        env_pass = os.environ.get('IMHENTAI_PASS')
+        cred_user = None
+        cred_pass = None
+        if env_user and env_pass:
+            cred_user, cred_pass = env_user, env_pass
+        elif args.cred_file and args.cred_file.exists():
+            try:
+                c = json.loads(args.cred_file.read_text(encoding='utf-8'))
+                cred_user = c.get('username')
+                cred_pass = c.get('password')
+            except Exception:
+                cred_user = cred_pass = None
+
+        authed = False
+        if cred_user and cred_pass:
+            authed = session_manager.login(cred_user, cred_pass)
+            if authed:
+                # Save cookies for future non-interactive runs
+                session_manager.save_cookies_to_store()
+
+        # If still not authenticated, prompt interactively unless --yes supplied
+        if not authed:
+            if args.yes:
+                console.print("   You may have limited access to galleries")
+            else:
+                authed = session_manager.ensure_authenticated(interactive=True)
+                if authed:
+                    session_manager.save_cookies_to_store()
+                    console.print("[green]✓ Authenticated via credentials[/green]")
+                else:
+                    console.print("   You may have limited access to galleries")
 
     # Perform search
     console.print(f"\n[bold]Searching for galleries with tags: {preset_config.tags}[/bold]")
     if preset_config.exclude_tags:
         console.print(f"  Excluding tags: {preset_config.exclude_tags}")
 
-    api = IMHentaiAPI(session_manager.get_session())
+    # Configure API with viewer request delay (default 500ms)
+    viewer_delay = args.viewer_delay_ms if args.viewer_delay_ms is not None else 500
+    api = IMHentaiAPI(session_manager.get_session(), viewer_request_delay_ms=viewer_delay)
 
     # Build language flags from CLI override if provided
     lang_flags = None
@@ -234,10 +292,10 @@ def main():
         delay_seconds=dl_config.download_delay_seconds,
         max_retries=dl_config.max_retries,
         timeout_seconds=dl_config.timeout_seconds,
-        concurrent_downloads=dl_config.concurrent_downloads
+        concurrent_downloads=(args.gallery_concurrency if args.gallery_concurrency is not None else dl_config.concurrent_downloads)
     )
 
-    # Run async download
+    # Run async download (use viewer-based scraping; ZIP generation removed)
     try:
         stats = asyncio.run(downloader.download_galleries(
             galleries,

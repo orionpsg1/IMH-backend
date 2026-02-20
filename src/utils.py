@@ -175,6 +175,24 @@ class URLGenerator:
         if encoded_key:
             params.append(f"key={encoded_key}")
 
+        # Default advanced-search flags observed in browser (helps return results):
+        # lt, pp, dl, tr: filter toggles; m/d/w/i/a/g: content type flags
+        default_search_flags = {
+            "lt": 0,
+            "pp": 0,
+            "dl": 0,
+            "tr": 0,
+            "m": 1,
+            "d": 1,
+            "w": 1,
+            "i": 1,
+            "a": 1,
+            "g": 1,
+        }
+
+        for k, v in default_search_flags.items():
+            params.append(f"{k}={v}")
+
         # Default language filters: English only unless overridden
         default_langs = {
             "en": 1,

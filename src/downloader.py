@@ -22,7 +22,7 @@ class DownloadManager:
         delay_seconds: int = 30,
         max_retries: int = 3,
         timeout_seconds: int = 30,
-        concurrent_downloads: int = 2
+        concurrent_downloads: int = 1
     ):
         """Initialize download manager.
         
@@ -130,6 +130,8 @@ class DownloadManager:
                         stats["skipped_images"] += 1
                         continue
 
+            
+
                     # Download image with retries
                     success = await self._download_image_with_retry(
                         session,
@@ -233,6 +235,8 @@ class DownloadManager:
                     return False
 
         return False
+
+    # ZIP functionality removed; viewer-based image scraping is used instead via download_galleries
 
     async def _wait_for_rate_limit(self) -> None:
         """Enforce rate limiting delay between downloads."""
