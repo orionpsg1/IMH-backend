@@ -72,6 +72,19 @@ def main():
     )
 
     parser.add_argument(
+        "--lang",
+        type=str,
+        help="Languages to include (comma-separated codes, e.g. 'en,jp'). Defaults to English only"
+    )
+
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Proceed without confirmation (non-interactive)"
+    )
+
+    parser.add_argument(
         "--list-presets",
         action="store_true",
         help="List all available presets and exit"
@@ -165,12 +178,20 @@ def main():
 
     api = IMHentaiAPI(session_manager.get_session())
 
+    # Build language flags from CLI override if provided
+    lang_flags = None
+    if args.lang:
+        requested = {x.strip().lower() for x in args.lang.split(',') if x.strip()}
+        all_codes = ['en', 'jp', 'es', 'fr', 'kr', 'de', 'ru']
+        lang_flags = {code: (1 if code in requested else 0) for code in all_codes}
+
     try:
         galleries = api.search(
             tags=preset_config.tags,
             exclude_tags=preset_config.exclude_tags,
             max_results=preset_config.max_results,
-            max_pages=preset_config.max_pages
+            max_pages=preset_config.max_pages,
+            lang_flags=lang_flags
         )
     except Exception as e:
         console.print(f"[red]Search failed: {e}[/red]")
@@ -199,8 +220,8 @@ def main():
 
     console.print(table)
 
-    # Confirm before downloading
-    if not _confirm_download(console, len(galleries)):
+    # Confirm before downloading (skip if --yes provided)
+    if not args.yes and not _confirm_download(console, len(galleries)):
         console.print("[yellow]Download cancelled[/yellow]")
         return 0
 

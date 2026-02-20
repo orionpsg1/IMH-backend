@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
+from urllib.parse import quote
 
 
 class PathTemplater:
@@ -148,7 +149,7 @@ class URLGenerator:
     BASE_URL = "https://imhentai.xxx"
 
     @staticmethod
-    def search_url(tags: list[str], page: int = 1) -> str:
+    def search_url(tags: list[str], page: int = 1, lang_flags: dict | None = None) -> str:
         """Generate search URL for tags.
         
         Args:
@@ -158,19 +159,54 @@ class URLGenerator:
         Returns:
             Complete search URL.
         """
-        # IMHentai uses tag slugs separated by slashes in the URL path
+        # Use the advanced search endpoint with a `key` query parameter
+        # Build a key like: +tag:"tag one" +tag:"tag two"
         if not tags:
-            search_path = "/"
+            key = ""
         else:
-            # Join tags with forward slash for URL path
-            tag_path = "/".join(tags)
-            search_path = f"/search/{tag_path}/"
-        
-        # Add page parameter if needed
-        url = f"{URLGenerator.BASE_URL}{search_path}"
+            terms = [f'+tag:"{t}"' for t in tags]
+            key = " ".join(terms)
+
+        # Percent-encode the key fully so + becomes %2B and spaces become %20
+        encoded_key = quote(key, safe='') if key else ''
+
+        url = f"{URLGenerator.BASE_URL}/advsearch/"
+        params = []
+        if encoded_key:
+            params.append(f"key={encoded_key}")
+
+        # Default language filters: English only unless overridden
+        default_langs = {
+            "en": 1,
+            "jp": 0,
+            "es": 0,
+            "fr": 0,
+            "kr": 0,
+            "de": 0,
+            "ru": 0,
+        }
+
+        if lang_flags is None:
+            lang_flags = default_langs
+        else:
+            # Merge provided flags with defaults (missing keys use defaults)
+            merged = default_langs.copy()
+            for k, v in (lang_flags.items() if isinstance(lang_flags, dict) else {}):
+                if k in merged:
+                    merged[k] = 1 if v else 0
+            lang_flags = merged
+
+        for k, v in lang_flags.items():
+            params.append(f"{k}={v}")
+
+        # include apply=search to mimic browser behavior
+        params.append("apply=search")
         if page > 1:
-            url += f"?page={page}"
-        
+            params.append(f"page={page}")
+
+        if params:
+            url += "?" + "&".join(params)
+
         return url
 
     @staticmethod

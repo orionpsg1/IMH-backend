@@ -47,6 +47,17 @@ Expected output:
 imhentai --preset default
 ```
 
+### Run non-interactively (auto-confirm):
+```powershell
+imhentai --preset default --yes
+```
+
+### Force English-only results (default behavior)
+```powershell
+imhentai --preset default --lang en
+```
+To include multiple languages, pass comma-separated codes: `--lang en,jp`.
+
 ### Download with custom tags:
 ```powershell
 imhentai --tags "school,romance" --max-results 50

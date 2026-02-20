@@ -42,7 +42,8 @@ class IMHentaiAPI:
         tags: List[str],
         exclude_tags: List[str] = None,
         max_results: Optional[int] = 100,
-        max_pages: Optional[int] = 5
+        max_pages: Optional[int] = 5,
+        lang_flags: Optional[Dict[str, int]] = None
     ) -> List[Gallery]:
         """Search galleries by tags.
         
@@ -71,7 +72,7 @@ class IMHentaiAPI:
                 break
 
             try:
-                page_galleries = self._search_page(tags, page)
+                page_galleries = self._search_page(tags, page, lang_flags=lang_flags)
                 
                 if not page_galleries:
                     # No more results
@@ -96,7 +97,7 @@ class IMHentaiAPI:
 
         return galleries
 
-    def _search_page(self, tags: List[str], page: int = 1) -> List[Gallery]:
+    def _search_page(self, tags: List[str], page: int = 1, lang_flags: Optional[Dict[str, int]] = None) -> List[Gallery]:
         """Search a single page of results.
         
         Args:
@@ -106,7 +107,8 @@ class IMHentaiAPI:
         Returns:
             List of Gallery objects from this page.
         """
-        url = URLGenerator.search_url(tags, page)
+        # Use language flags if provided (URLGenerator defaults to English-only)
+        url = URLGenerator.search_url(tags, page, lang_flags=lang_flags)
         
         response = self.session.get(url, timeout=30)
         response.raise_for_status()

@@ -53,6 +53,17 @@ python main.py --preset default --tags "school,romance" --exclude-tags "rape"
 python main.py --preset default --delay 40
 ```
 
+**Language filter (defaults to English-only):**
+```powershell
+python main.py --preset default --lang en
+```
+You can pass multiple language codes (comma-separated) to include more than one language, e.g. `--lang en,jp`.
+
+**Skip interactive confirmation (non-interactive):**
+```powershell
+python main.py --preset default --yes
+```
+
 **Limit search results:**
 ```powershell
 python main.py --preset default --max-results 100 --max-pages 5
@@ -85,6 +96,8 @@ Options:
   --delay DELAY                Delay between downloads in seconds
   --output OUTPUT              Output directory
   --browser {firefox,chrome}   Browser for cookie extraction (default: firefox)
+  --lang LANG                  Languages to include (comma-separated codes, default: en)
+  -y, --yes                    Proceed without confirmation (non-interactive)
   --list-presets              List all available presets
   --test-connection           Test IMHentai connection and authentication
   -h, --help                  Show help message
