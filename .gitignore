@@ -17,4 +17,6 @@ node_modules/
 # Ignore local config overrides
 *.local.json
 media.config.json
+*.json
 
+config/presets.json
